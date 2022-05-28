@@ -44,21 +44,50 @@
 	</div>
 
 	<script>
-		plataforma.posicion = 395
+		plataforma.x = 350
 
 		onkeydown = moverPlataforma
 
 		function moverPlataforma(evento){
-			console.log(evento.keyCode)
+			//console.log(evento.keyCode)
 			
 			if (evento.keyCode == 37)	//Izqda.
-				plataforma.posicion -= 5
+				plataforma.x -= 5
 			if (evento.keyCode == 39)	//Dcha.
-				plataforma.posicion += 5
+				plataforma.x += 5
 			
-			plataforma.style.left = plataforma.posicion + 'px'
+			plataforma.style.left = plataforma.x + 'px'
 			
 			event.preventDefault()
+		}
+
+		//La pelota es un poco más complicada
+		pelota.x = 395
+		pelota.y = 245
+		pelota.dirX = 3
+		pelota.dirY = -3
+
+		setInterval(moverPelota, 30)
+
+		function moverPelota(){
+			pelota.x += pelota.dirX
+			pelota.y += pelota.dirY
+
+			//Controlar el rebote
+			if (pelota.x <= 0 || pelota.x >= 790)
+				pelota.dirX *= -1
+
+			if (pelota.y <= 0 || pelota.y >= 490)
+				pelota.dirY *= -1
+
+			//Rebote en plataforma
+			if (pelota.y >= 465 && pelota.y <= 480)
+				if(pelota.x >= plataforma.x && pelota.x < plataforma.x + 100)
+					pelota.dirY *= -1
+
+			//Actualizar posición
+			pelota.style.left = pelota.x + 'px'
+			pelota.style.top = pelota.y + 'px'
 		}
 	</script>
 </body>
