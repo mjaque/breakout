@@ -43,5 +43,23 @@
 		<div id=plataforma></div>
 	</div>
 
+	<script>
+		plataforma.posicion = 395
+
+		onkeydown = moverPlataforma
+
+		function moverPlataforma(evento){
+			console.log(evento.keyCode)
+			
+			if (evento.keyCode == 37)	//Izqda.
+				plataforma.posicion -= 5
+			if (evento.keyCode == 39)	//Dcha.
+				plataforma.posicion += 5
+			
+			plataforma.style.left = plataforma.posicion + 'px'
+			
+			event.preventDefault()
+		}
+	</script>
 </body>
 </html>
