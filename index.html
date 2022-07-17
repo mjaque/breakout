@@ -8,6 +8,7 @@
         	background-color: pink;
         }
         #zona{
+			position: relative;	/* Para que haga de referencia a sus hijos */
             width: 800px;
             height: 500px;
             background-color: black;
@@ -17,18 +18,24 @@
 			width: 100px;
 			height: 20px;
 			background-color: blue;
-			position: relative;
+			position: absolute;
 			top: 465px;
 			left: 350px; 
 		}
 		#pelota{
 			width: 10px;
 			height: 10px;
-			background-color: red;
-			position: relative;
+			background-color: white;
+			position: absolute;
 			top: 245px;
 			left: 395px;
 			border-radius: 5px;
+		}
+		.ladrillo{
+			width: 50px;
+			height: 25px;
+			background-color: red;
+			position: absolute;
 		}
     </style>
 
@@ -55,19 +62,25 @@
 				plataforma.x -= 5
 			if (evento.keyCode == 39)	//Dcha.
 				plataforma.x += 5
+
+			//Evitamos que se salga
+			if (plataforma.x < 0)
+				plataforma.x = 0
+			if (plataforma.x + 100 > 800)
+				plataforma.x = 800 - 100
 			
 			plataforma.style.left = plataforma.x + 'px'
-			
+
 			event.preventDefault()
 		}
 
 		//La pelota es un poco más complicada
-		pelota.x = 395
+		pelota.x = 295
 		pelota.y = 245
 		pelota.dirX = 3
 		pelota.dirY = -3
 
-		setInterval(moverPelota, 30)
+		var animador = setInterval(moverPelota, 30)
 
 		function moverPelota(){
 			pelota.x += pelota.dirX
@@ -77,17 +90,86 @@
 			if (pelota.x <= 0 || pelota.x >= 790)
 				pelota.dirX *= -1
 
-			if (pelota.y <= 0 || pelota.y >= 490)
+			if (pelota.y <= 0)
 				pelota.dirY *= -1
 
 			//Rebote en plataforma
-			if (pelota.y >= 465 && pelota.y <= 480)
-				if(pelota.x >= plataforma.x && pelota.x < plataforma.x + 100)
+			if (pelota.y >= 455 && pelota.y <= 490)
+				if(pelota.x >= plataforma.x && pelota.x < plataforma.x + 100){
 					pelota.dirY *= -1
+					//Cambio de ángulo (dirX)
+					let variacion = ((pelota.x + 5) - (plataforma.x + 100/2)) / (100/10)
+					pelota.dirX += variacion
+			}
+
+			//Detectar pérdida
+			if (pelota.y >= 490){
+				clearInterval(animador)
+				alert('Has perdido')
+			}
+
+			//Colisión con ladrillos
+			let ladrillos = document.querySelectorAll('div.ladrillo')
+			for (let ladrillo of ladrillos){
+				//Comprobamos si la pelota está en alguna de las cuatro áreas del ladrillo
+				ladrillo.x = parseInt(ladrillo.style.left)
+				ladrillo.y = parseInt(ladrillo.style.top)
+				//Colisión por ABAJO
+				if (pelota.dirY < 0)
+					if (pelota.y > ladrillo.y + 25)
+						if (pelota.x + 5 > ladrillo.x)
+							if (pelota.x - 5 < ladrillo.x + 50)
+								if (pelota.y - ladrillo.y - 25 < 5){
+									document.getElementById('zona').removeChild(ladrillo) 
+									pelota.dirY *= -1
+								}
+				//Colisión por ARRIBA
+				if (pelota.dirY > 0)
+					if (pelota.y < ladrillo.y)
+						if (pelota.x + 5 > ladrillo.x)
+							if (pelota.x - 5 < ladrillo.x + 50)
+								if (ladrillo.y - pelota.y < 10){
+									document.getElementById('zona').removeChild(ladrillo)
+									pelota.dirY *= -1
+								}
+				//Colisión por DERECHA
+				if (pelota.dirX < 0)
+					if (pelota.x > ladrillo.x + 50)
+						if (pelota.y + 5 > ladrillo.y)
+							if (pelota.y - 5 < ladrillo.y + 25)
+								if (pelota.x - ladrillo.x - 50 < 5){
+									document.getElementById('zona').removeChild(ladrillo)
+									pelota.dirX *= -1
+								}
+				//Colisión por IZQUIERDA
+				if (pelota.dirX > 0)
+					if (pelota.x < ladrillo.x)
+						if (pelota.y + 5 > ladrillo.y)
+							if (pelota.y - 5 < ladrillo.y + 25)
+								if (ladrillo.x - pelota.x < 5){
+									document.getElementById('zona').removeChild(ladrillo)
+									pelota.dirX *= -1
+								}
+			}
 
 			//Actualizar posición
 			pelota.style.left = pelota.x + 'px'
 			pelota.style.top = pelota.y + 'px'
+		}
+
+		//Los ladrillos
+		window.onload = crearLadrillos
+
+		function crearLadrillos(){
+			//Tres filas de 10 ladrillos
+			for (let fila = 1; fila <= 3; fila ++)
+				for (let col = 1; col <= 10; col++){
+					let div = document.createElement('div')
+					document.getElementById('zona').appendChild(div)
+					div.classList.add('ladrillo')
+					div.style.top = (40 * fila) + 'px'
+					div.style.left = (70 * col - 15) + 'px'
+				}
 		}
 	</script>
 </body>
